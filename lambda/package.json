@@ -1,0 +1,20 @@
+{
+  "name": "policy-tracer-lambda",
+  "version": "1.0.0",
+  "description": "PolicyTracer - Policy Tool Lambda API",
+  "private": true,
+  "scripts": {
+    "build":     "esbuild src/handler.ts --bundle --platform=node --target=node22 --format=cjs --outfile=dist/handler.js --external:@aws-sdk/*",
+    "typecheck": "tsc --noEmit",
+    "deploy":    "npm run build && sam deploy"
+  },
+  "dependencies": {
+    "mongoose": "^8.5.1"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.143",
+    "@types/node":       "^22.0.0",
+    "esbuild":           "^0.24.0",
+    "typescript":        "^5.5.3"
+  }
+}

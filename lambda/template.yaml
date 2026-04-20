@@ -1,0 +1,69 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: PolicyTracer - Policy Tool Lambda API (generates real CloudWatch logs)
+
+Parameters:
+  MongoUri:
+    Type:        String
+    NoEcho:      true
+    Description: MongoDB Atlas connection string
+
+Globals:
+  Function:
+    Runtime:    nodejs22.x
+    Timeout:    30
+    MemorySize: 512
+    Environment:
+      Variables:
+        NODE_ENV:  production
+
+Resources:
+
+  # ── Lambda Function ──────────────────────────────────────────────────────────
+  PolicyServiceFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: policy-service
+      Handler:      handler.handler
+      CodeUri:      dist/
+      Description:  Policy status and events API — writes structured logs to CloudWatch
+      Environment:
+        Variables:
+          MONGO_URI: !Ref MongoUri
+      Events:
+        PolicyStatus:
+          Type: HttpApi
+          Properties:
+            Path:   /policy-status
+            Method: POST
+        PolicyEvents:
+          Type: HttpApi
+          Properties:
+            Path:   /policy-events
+            Method: POST
+        # CORS preflight
+        PolicyStatusOptions:
+          Type: HttpApi
+          Properties:
+            Path:   /policy-status
+            Method: OPTIONS
+        PolicyEventsOptions:
+          Type: HttpApi
+          Properties:
+            Path:   /policy-events
+            Method: OPTIONS
+
+  # ── Explicit log group so retention is controlled ────────────────────────────
+  PolicyServiceLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName:      /aws/lambda/policy-service
+      RetentionInDays:   30
+
+Outputs:
+  PolicyApiUrl:
+    Description: "Set this as POLICY_LAMBDA_URL in backend/.env"
+    Value: !Sub "https://${ServerlessHttpApi}.execute-api.${AWS::Region}.amazonaws.com"
+  LambdaLogGroup:
+    Description: "CloudWatch log group (add to CW_LOG_GROUPS in backend/.env)"
+    Value: /aws/lambda/policy-service

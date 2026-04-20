@@ -1,4 +1,4 @@
-# 🛡️ PolicyTracer — Agentic AI Platform
+#  PolicyTracer — Agentic AI Platform
 
 Enterprise-grade agentic AI workflow for insurance policy investigation and CloudWatch log tracing.
 
